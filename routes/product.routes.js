@@ -31,6 +31,17 @@ router.post('/analyze-image', uploadMiddleware.multiUpload, productController.an
 router.post('/:productId/offers', offerController.makeOffer);
 router.get('/:productId/offers', offerController.getProductOffers);
 
+// Add these routes to product.routes.js to handle the offer responses
+
+// Respond to an offer
+router.put('/offers/:offerId', verifyToken, offerController.respondToOffer);
+
+// Respond to a counter offer
+router.put('/offers/:offerId/counter-response', verifyToken, offerController.respondToCounterOffer);
+
+// Get offer by ID
+router.get('/offers/:offerId', verifyToken, offerController.getOfferById);
+
 // Add this route to test image analysis
 router.post('/test-analysis', uploadMiddleware.multiUpload, async (req, res) => {
   try {
