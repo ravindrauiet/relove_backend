@@ -480,3 +480,71 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 }; 
+
+
+/**
+ * Get user's recent activity
+ * @route   GET /api/users/activity
+ * @access  Private
+ */
+exports.getUserActivity = async (req, res) => {
+  try {
+    const userId = req.dbUser._id;
+    
+    // Get user's listings
+    const listings = await Product.find({ seller: userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+      
+    // Get user's favorite products
+    const favorites = await User.findById(userId)
+      .select('favorites')
+      .populate({
+        path: 'favorites',
+        select: 'title price images createdAt seller',
+        populate: {
+          path: 'seller',
+          select: 'name'
+        }
+      });
+      
+    // Get offers made by the user
+    const sentOffers = await Offer.find({ buyer: userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate({
+        path: 'product',
+        select: 'title price images',
+      })
+      .populate({
+        path: 'seller',
+        select: 'name'
+      });
+      
+    // Get offers received by the user (on their products)
+    const receivedOffers = await Offer.find({ seller: userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate({
+        path: 'product',
+        select: 'title price images',
+      })
+      .populate({
+        path: 'buyer',
+        select: 'name'
+      });
+      
+    // Combine all activity
+    const activity = {
+      listings,
+      favorites: favorites?.favorites || [],
+      sentOffers,
+      receivedOffers
+    };
+    
+    res.status(200).json(activity);
+  } catch (error) {
+    console.error('Get user activity error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}; 

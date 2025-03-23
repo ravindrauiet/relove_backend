@@ -36,4 +36,7 @@ router.get('/:id', verifyToken, isAdmin, userController.getUserById);
 router.put('/:id', verifyToken, isAdmin, userController.updateUser);
 router.delete('/:id', verifyToken, isAdmin, userController.deleteUser);
 
+// User activity
+router.get('/activity', verifyToken, userController.getUserActivity);
+
 module.exports = router;
